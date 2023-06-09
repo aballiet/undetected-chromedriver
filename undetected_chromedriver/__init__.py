@@ -383,10 +383,12 @@ class Chrome(selenium.webdriver.chrome.webdriver.WebDriver):
             options.arguments.extend(["--no-sandbox", "--test-type"])
 
         if headless or options.headless:
-            if self.patcher.version_main < 108:
-                options.add_argument("--headless=chrome")
-            elif self.patcher.version_main >= 108:
-                options.add_argument("--headless=new")
+            #workaround until a better checking is found
+            options.add_argument("--headless=new")
+            #if self.patcher.version_main < 108:
+            #    options.add_argument("--headless=chrome")
+            #elif self.patcher.version_main >= 108:
+            
 
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--start-maximized")
@@ -733,7 +735,7 @@ class Chrome(selenium.webdriver.chrome.webdriver.WebDriver):
             os.kill(self.browser_pid, 15)
             logger.debug("gracefully closed browser")
         except Exception as e:  # noqa
-            logger.debug(e, exc_info=True)
+            pass
         if (
             hasattr(self, "keep_user_data_dir")
             and hasattr(self, "user_data_dir")
@@ -852,5 +854,7 @@ def find_chrome_executable():
                 ):
                     candidates.add(os.sep.join((item, subitem, "chrome.exe")))
     for candidate in candidates:
+        logger.debug('checking if %s exists and is executable' % candidate)
         if os.path.exists(candidate) and os.access(candidate, os.X_OK):
+            logger.debug('found! using %s' % candidate)
             return os.path.normpath(candidate)
